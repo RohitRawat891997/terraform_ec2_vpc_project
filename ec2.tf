@@ -1,22 +1,3 @@
-resource "aws_security_group" "main" {
-  vpc_id = aws_vpc.main.id
-
-  ingress {
-    from_port = 0
-    to_port = 0
-    protocol = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port = 0
-    to_port = 0
-    protocol = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-}
-
-
 data "aws_ami" "ubuntu" {
   most_recent = true
 
@@ -41,7 +22,7 @@ resource "aws_key_pair" "main" {
 resource "aws_instance" "main" {
   instance_type = "t2.micro"
   ami = data.aws_ami.ubuntu.id
-  subnet_id = values(aws_subnet.main)[5].id
+  subnet_id = values(aws_subnet.main)[1].id
   vpc_security_group_ids = [aws_security_group.main.id]
   associate_public_ip_address = true
   key_name = aws_key_pair.main.key_name
@@ -54,4 +35,36 @@ resource "aws_instance" "main" {
 output "subnet_list" {
   value = aws_instance.main.public_ip
   description = "public ip of aws instance"
+}
+
+resource "aws_security_group" "main" {
+  vpc_id = aws_vpc.main.id
+
+  ingress {
+    description = "port 22 allow"
+    from_port = 22
+    to_port = 22
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  
+  ingress {
+    description = "port 80 allow"
+    from_port = 80
+    to_port = 80
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "mysecurity"
+  }
+
 }
